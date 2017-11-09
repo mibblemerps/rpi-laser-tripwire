@@ -1,4 +1,6 @@
 return {
-	mainVideo = "main_video.mp4",
-	triggerVideo = "trigger_video.mp4"
+	mainVideo = "videos/pump_concept.ogg",
+	triggerVideo = "videos/space_pony.ogg",
+	loadAudio = true,
+	fullscreen = true
 }
