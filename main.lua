@@ -1,4 +1,7 @@
 -- Video Tripwire Project
+
+local GPIO = require("periphery").GPIO
+
 print("Video Tripwire")
 
 -- Configuration
@@ -14,6 +17,10 @@ local triggerSx, triggerSy
 -- State
 local currentVideo
 local tripped = false
+
+-- GPIO
+local tripwirePinId = 21
+local tripwireGpio
 
 ---
 
@@ -43,6 +50,10 @@ function love.load()
 	love.window.setTitle("Video Tripwire")
 	love.mouse.setVisible(false)
 	
+	-- Init GPIO
+	print("Initialising GPIO...")
+	tripwireGpio = GPIO(tripwirePinId, "in")
+	
 	-- Load video streams
 	print("Loading main video ('" .. config.mainVideo .. "')")
 	mainVideo.video = love.graphics.newVideo(config.mainVideo, config.loadAudio)
@@ -66,6 +77,7 @@ function love.draw()
 		if tripped and (currentVideo == mainVideo) then
 			-- Tripwire tripped and we're playing the main video, switch to the trigger video
 			setCurrentVideo(triggerVideo)
+			tripped = false -- Reset trip
 		elseif currentVideo == triggerVideo then
 			-- We're playing the trigger video - don't repeat and switch back to the main video
 			setCurrentVideo(mainVideo)
@@ -78,6 +90,9 @@ function love.draw()
 end
 
 function love.update(dt)
-	
+	if ((currentVideo == mainVideo) and tripwireGpio:read()) then
+		-- Tripped!
+		tripped = true
+	end
 end
 
