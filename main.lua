@@ -28,6 +28,9 @@ local function setCurrentVideo(video)
 	currentVideo = video
 	video.video:rewind()
 	video.video:play()
+	
+	if (video == mainVideo) then print("Switched to main video.") end
+	if (video == triggerVideo) then print("Switched to trigger video.") end
 end
 
 ---
@@ -52,7 +55,7 @@ function love.load()
 	triggerVideo.sx, triggerVideo.sy = getScaleForVideo(triggerVideo.video)
 	
 	
-	setCurrentVideo(triggerVideo)
+	setCurrentVideo(mainVideo)
 end
 
 function love.draw()
@@ -62,10 +65,14 @@ function love.draw()
 	if not currentVideo.video:isPlaying() then
 		if tripped and (currentVideo == mainVideo) then
 			-- Tripwire tripped and we're playing the main video, switch to the trigger video
-			
+			setCurrentVideo(triggerVideo)
 		elseif currentVideo == triggerVideo then
 			-- We're playing the trigger video - don't repeat and switch back to the main video
 			setCurrentVideo(mainVideo)
+		else
+			-- Just playing the normal video and nothing has tripped. Loop main video
+			currentVideo.video:rewind()
+			currentVideo.video:play()
 		end
 	end
 end
