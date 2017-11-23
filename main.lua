@@ -20,7 +20,10 @@ local tripped = false
 
 -- GPIO
 local tripwirePinId = 21
-local tripwireGpio
+
+-- LDR
+local ldrThread
+local ldrChannel
 
 ---
 
@@ -40,6 +43,10 @@ local function setCurrentVideo(video)
 	if (video == triggerVideo) then print("Switched to trigger video.") end
 end
 
+local function readLightValue()
+	return ldrChannel:pop()
+end
+
 ---
 
 function love.load()
@@ -50,10 +57,12 @@ function love.load()
 	love.window.setTitle("Video Tripwire")
 	love.mouse.setVisible(false)
 	
-	-- Init GPIO
-	print("Initialising GPIO...")
-	tripwireGpio = GPIO(tripwirePinId, "in")
-	
+	-- Setup LDR thread
+	print("Setup LDR thread...")
+	ldrThread = love.thread.newThread("ldr.lua")
+	ldrThread:start()
+	ldrChannel = love.thread.getChannel("light")
+
 	-- Load video streams
 	print("Loading main video ('" .. config.mainVideo .. "')")
 	mainVideo.video = love.graphics.newVideo(config.mainVideo, config.loadAudio)
@@ -67,6 +76,11 @@ function love.load()
 	
 	
 	setCurrentVideo(mainVideo)
+end
+
+function love.threaderror(thread, msg)
+	print("Error on thread")
+	print(msg)
 end
 
 function love.draw()
@@ -90,7 +104,10 @@ function love.draw()
 end
 
 function love.update(dt)
-	if ((currentVideo == mainVideo) and tripwireGpio:read()) then
+	local ldrValue = readLightValue()
+	--print("Main: " .. tostring(ldrValue))
+	
+	if ((ldrValue ~= nil) and (currentVideo == mainVideo) and (ldrValue > 1)) then
 		-- Tripped!
 		tripped = true
 	end
