@@ -1,6 +1,6 @@
 return {
-	mainVideo = "videos/pump_concept.ogg",
-	triggerVideo = "videos/space_pony.ogg",
-	loadAudio = true,
+	mainVideo = "videos/still.ogg",
+	triggerVideo = "videos/anime.ogg",
+	loadAudio = false,
 	fullscreen = true
 }
